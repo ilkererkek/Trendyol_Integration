@@ -44,7 +44,16 @@ namespace Trendyol_Integration.Controllers
             var res = category.SubCategories.ToList().Select(item => new { CategoryId = item.CategoryId, CategoryName = item.CategoryName , leaf = (item.SubCategories.Count==0)});
             return Json(new { data = res },JsonRequestBehavior.AllowGet);
         }
-
+        public ActionResult GetAttributes(int id)
+        {
+            var client = new RestClient("https://api.trendyol.com/sapigw");
+            client.Authenticator = new HttpBasicAuthenticator("Bnib0D0RMditHE4NEiV8", "rAsrd6PpPEDiahvsZEKy");
+            client.AddDefaultHeader("user-agent", "235333-PiaLab");
+            var request = new RestRequest("product-categories/"+id+"/attributes");
+            var response = client.Get(request);
+            JObject responseJSON = JObject.Parse(response.Content);
+            return Json(responseJSON.ToString(), JsonRequestBehavior.AllowGet);
+        }
         private Category TraverseTree(JObject node, Category parent)
         {
             

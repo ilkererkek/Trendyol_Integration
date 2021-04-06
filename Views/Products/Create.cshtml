@@ -13,16 +13,25 @@
     @Html.AntiForgeryToken()
     <div class="form-group">
         @Html.LabelFor(model => model.product.CargoCompanyId)
-        @Html.DropDownListFor(model => model.product.CargoCompanyId, new SelectList(Model.providers, "Id", "Name"))
+        @Html.DropDownListFor(model => model.product.CargoCompanyId, new SelectList(Model.providers, "Id", "Name"),new { @class="form-control"})
     </div>
     @Html.HiddenFor(model=>model.product.Category)
+    <div class="select">
+        <div class="form-group">
+            @Html.LabelFor(model => model.product.Category)
+            @Html.HiddenFor(model=> model.product.Category,new { @class="category-input"})
+            <select class="category-select form-control" name="categories" id="0">
+                <option disabled selected value> Kategori Seçiniz </option>
+                @foreach (var item in Model.categories)
+                {
+                    
+                    <option value=@item.CategoryId>@item.CategoryName</option>
+                }
 
-<select class="category-select" name="categories" id="categories">
-    @foreach (var item in Model.categories) {
-        <option  value=@item.CategoryId>@item.CategoryName</option>
-    }
+            </select>
+        </div>
+    </div>
 
-</select>
 }
 
 <div>
