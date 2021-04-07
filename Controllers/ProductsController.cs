@@ -31,25 +31,11 @@ namespace Trendyol_Integration.Controllers
         // GET: Products/Create
         public ActionResult Create()
         {
-            CreateProductModel createProductModel = new CreateProductModel();
-            List<Provider> providers = GetProviders();
-            var categories = db.Categories.ToList().Where(x => x.ParentCategory == null);
-            List<SupplierAdress> adresses = GetAddresses();
-            createProductModel.ID = 0;
-            createProductModel.categories = categories.ToList();
-            createProductModel.product = new Product();
-            createProductModel.product.Category = new Category();
-            createProductModel.providers = GetProviders();
-            createProductModel.supplier = GetAddresses();
-            createProductModel.attributes = new List<Models.Attribute>();
-            return View(createProductModel);
+            
+            return View();
         }
-        public ActionResult CreateProceed(Product product)
+        public ActionResult CreateProceed()
         {
-            Category category = db.Categories.ToList().Find(x => x.CategoryId == product.Category.CategoryId);
-            if (category == null) return new HttpNotFoundResult("Category is not found");
-            product.Category = category;
-
             return View();
         }
 
@@ -84,10 +70,7 @@ namespace Trendyol_Integration.Controllers
             List<SupplierAdress> addresses = new List<SupplierAdress>();
             foreach (var res in responseArray)
             {
-                SupplierAdress address = new SupplierAdress();
-                address.id = (int)res["id"];
-                address.city = res["city"].ToString();
-                address.district = res["district"].ToString();
+                SupplierAdress address = new SupplierAdress((int)res["id"], res["city"].ToString(), res["district"].ToString());
                 addresses.Add(address);
             }
             return addresses;

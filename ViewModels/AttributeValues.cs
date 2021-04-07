@@ -5,7 +5,9 @@ using System.Web;
 
 namespace Trendyol_Integration.ViewModels
 {
-    public class CreateProductProceedModel
+    public class AttributeValues
     {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

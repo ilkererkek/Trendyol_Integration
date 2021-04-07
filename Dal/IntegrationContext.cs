@@ -18,7 +18,5 @@ namespace Trendyol_Integration.Dal
         public DbSet<Category> Categories { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<Models.Attribute> Attributes { get; set; }
-
-        public System.Data.Entity.DbSet<Trendyol_Integration.ViewModels.CreateProductModel> CreateProductModels { get; set; }
     }
 }
