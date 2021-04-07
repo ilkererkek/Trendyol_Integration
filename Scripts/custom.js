@@ -15,8 +15,8 @@ $(document).on('change', '.category-select', (e) => {
                 createSelect(index, data.data)
             }
             else {
+                console.log(id)
                 $('.category-input').val(id);
-                getAttributeList(id)
             }
         },
         error: function (data) {
@@ -42,21 +42,3 @@ const createSelect = (stackIndex,categories) => {
     $('.select').append(html)
 }
 
-const getAttributeList = (id) => {
-    $.ajax({
-        type: 'GET',
-        url: `/Categories/GetAttributes/${id}`,
-        dataType: 'json',
-        success: function (data) {
-            console.log(JSON.parse(data))
-
-        },
-        error: function (data) {
-
-        }
-    })
-}
-
-const createAttributeSelection = () => {
-
-}

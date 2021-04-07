@@ -15,5 +15,6 @@ namespace Trendyol_Integration.ViewModels
         public List<Provider> providers { get; set; }
         public List<SupplierAdress> supplier { get; set; }
         public List<Category> categories { get; set; }
+        public List<Models.Attribute> attributes { get; set; }
     }
 }

@@ -14,6 +14,7 @@ namespace Trendyol_Integration.Models
         public string AttributeName { get; set; }
         public string AttributeValue { get; set; }
         public int AttributeValueId { get; set; }
+
         public virtual Category Category { get; set; }
     }
 }

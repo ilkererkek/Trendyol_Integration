@@ -38,15 +38,22 @@ namespace Trendyol_Integration.Controllers
             createProductModel.ID = 0;
             createProductModel.categories = categories.ToList();
             createProductModel.product = new Product();
+            createProductModel.product.Category = new Category();
             createProductModel.providers = GetProviders();
-            createProductModel.supplier = GetAddresses(); 
-
+            createProductModel.supplier = GetAddresses();
+            createProductModel.attributes = new List<Models.Attribute>();
             return View(createProductModel);
         }
-        public ActionResult CreateProceed()
+        public ActionResult CreateProceed(Product product)
         {
+            Category category = db.Categories.ToList().Find(x => x.CategoryId == product.Category.CategoryId);
+            if (category == null) return new HttpNotFoundResult("Category is not found");
+            product.Category = category;
+
             return View();
         }
+
+      
         private List<Provider> GetProviders()
         {
             
