@@ -11,9 +11,7 @@ namespace Trendyol_Integration.Models
     {
 
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Required]
         public int CategoryId { get; set; }
-        [Required]
         public string CategoryName { get; set; }
         public virtual Category ParentCategory { get; set; }
         public virtual ICollection<Category> SubCategories { get; set; }

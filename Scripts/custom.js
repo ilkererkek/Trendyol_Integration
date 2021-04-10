@@ -1,21 +1,25 @@
 ﻿
-
+ 
 var stackSize = 1;
 $(document).on('change', '.category-select', (e) => {
     const id = $(e.target).val();
-    const index = $(e.target).attr('id');
-    deleteSelects(parseInt(index))
+    var index = parseInt($(e.target).attr('id'));
+    deleteSelects(index)
+    index = index+1
     $.ajax({
         type: 'GET',
         url: `/Categories/GetSubCategories/${id}`,
-        dataType: 'json',
+        dataType: 'html',
+        data: {
+            index
+        },
         success: function (data) {
-            if (data.data.length != 0) {
 
-                createSelect(index, data.data)
+            if (data.toString() !== '') {
+                stackSize++
+                $('.select').append(data)
             }
             else {
-                console.log(id)
                 $('.category-input').val(id);
             }
         },
@@ -25,20 +29,34 @@ $(document).on('change', '.category-select', (e) => {
     })
 
 })
+$(document).on('keyup', '.brandname-input', (e) => {
+    
+    var name = $(e.target).val();
+    $.ajax({
+        type: 'GET',
+        url: `/Products/Brands?name=${name}`,
+        dataType: 'html',
+        success: function (data) {
+            $('.search-results').html(data)
+        },
+        error: function (data) {
+
+        }
+    })
+})
+
+$(document).on('click', '.brand-button', (e) => {
+    const id = $(e.target).attr('id');
+    const name = $(e.target).text();
+    $('.brandname-input').val(name)
+    $('.brandid-input').val(parseInt(id))
+    $('.search-results').html('')
+})
 
 const deleteSelects = (index) => {
     for (var i = index + 1; i < stackSize; i++) {
         $('#' + i).remove()
     }
-}
-const createSelect = (stackIndex,categories) => {
-    stackSize++;
-    stackIndex++;
-    var html = `<div class="form-group"><select class="category-select form-control" name="categories" id="${stackIndex}"><option disabled selected value> Alt Kategori Seçiniz </option>`
-    for (var i = 0; i < categories.length; i++) {
-        html =  html.concat(`<option value="${categories[i].CategoryId}">${categories[i].CategoryName} </option>`)
-    }
-    html = html.concat(`</select></div>`)
-    $('.select').append(html)
+    $('.category-input').val(0);
 }
 

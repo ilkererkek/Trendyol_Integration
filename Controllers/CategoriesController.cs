@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Trendyol_Integration.Dal;
 using Trendyol_Integration.Models;
+using Trendyol_Integration.Util;
 
 namespace Trendyol_Integration.Controllers
 {
@@ -16,39 +17,35 @@ namespace Trendyol_Integration.Controllers
     {
 
         IntegrationContext db = new IntegrationContext();
-        // GET: Categories
-        public ActionResult Index()
-        {
-            var categories = db.Categories.ToList().Where(x=> x.ParentCategory==null);
-            return View(categories);
-        }
+        ApiHelper apiHelper = new ApiHelper();
         public ActionResult GetCategories()
         {
-            var client = new RestClient("https://api.trendyol.com/sapigw");
-            client.Authenticator = new HttpBasicAuthenticator("Bnib0D0RMditHE4NEiV8", "rAsrd6PpPEDiahvsZEKy");
-            client.AddDefaultHeader("user-agent", "235333-PiaLab");
-            var request = new RestRequest("product-categories");
-            var response = client.Get(request);
-            JObject responseJSON = JObject.Parse(response.Content);
-            JArray responseList = (JArray)responseJSON["categories"];
-            foreach (var res in responseList)
+            string response =   apiHelper.GetCategories();
+            if (!string.IsNullOrEmpty(response))
             {
-                TraverseTree((JObject)res, null);
+                JObject responseJSON = JObject.Parse(response);
+                JArray categoryList = (JArray)responseJSON["categories"];
+                foreach (var res in categoryList)
+                {
+                    TraverseTree((JObject)res, null);
+                }
+                db.SaveChanges();
             }
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            return RedirectToAction("Create","Products");
         }
-        public ActionResult GetSubCategories(int id)
+        public ActionResult GetSubCategories(int id,int? index)
         {
+            ViewBag.index = index;
             Category category = db.Categories.Find(id);
-            var res = category.SubCategories.ToList().Select(item => new { CategoryId = item.CategoryId, CategoryName = item.CategoryName , leaf = (item.SubCategories.Count==0)});
-            return Json(new { data = res },JsonRequestBehavior.AllowGet);
+            List<Category> categories= category.SubCategories.ToList();
+            if (categories.Count == 0) return null;
+            return PartialView(categories);
         }
         private Category TraverseTree(JObject node, Category parent)
         {
             
             Category category = new Category();
-            category.CategoryId = int.Parse(node["id"].ToString());
+            category.CategoryId = (int)node["id"];
             Category old = db.Categories.ToList().Find(x => x.CategoryId == category.CategoryId);
             if(old == null)
             {

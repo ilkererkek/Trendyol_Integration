@@ -1,0 +1,53 @@
+﻿
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model Trendyol_Integration.ViewModels.CreateProductModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using (Html.BeginForm("CreateProceed", "Products", FormMethod.Get))
+{
+
+<div class="form-horizontal m-5">
+    <h1 class="h3 mb-2 m5 text-gray-800">Ürün Oluştur</h1>
+    <hr />
+    <div class="form-group col-md-8">
+        @Html.LabelFor(model => model.CargoCompanyId)
+        @Html.DropDownListFor(model => model.CargoCompanyId, new SelectList(Model.Providers, "Id", "Name"), new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.CargoCompanyId, "", new { @class = "text-danger" })
+    </div>
+    <div class="select">
+        <div class="form-group col-md-8">
+            @Html.LabelFor(model => model.CategoryId)
+            <select class="category-select form-control" name="categories" id="0">
+                <option disabled selected> Kategori Seçiniz </option>
+                @foreach (var item in Model.Categories)
+                {
+                    <option value=@item.CategoryId>@item.CategoryName</option>
+                }
+
+            </select>
+        </div>
+    </div>
+    <div class="col-md-8">
+         @Html.HiddenFor(model => model.CategoryId, new { @class = "category-input" })
+          @Html.ValidationMessageFor(model => model.CategoryId, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group mt-5">
+        <div class="col-md-5 ">
+            <input type="submit" value="Devam Et" class="btn btn-primary btn-block" />
+        </div>
+    </div>
+    <div class="col-md-5" >
+        @Html.ActionLink("Listeye Dön", "Index")
+    </div>
+</div>
+}
+
+
+

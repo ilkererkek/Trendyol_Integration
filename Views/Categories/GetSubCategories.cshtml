@@ -1,0 +1,10 @@
+﻿@model List<Trendyol_Integration.Models.Category>
+<div class="form-group col-md-8">
+    <select class="category-select form-control" name="categories" id=@ViewBag.index>
+        <option disabled selected value> Alt Kategori Seçiniz </option>
+        @foreach (var category in Model)
+        {
+            <option value=@category.CategoryId>@category.CategoryName</option>
+        }
+    </select>
+</div>

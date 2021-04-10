@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
+using RestSharp.Serialization.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +10,8 @@ using System.Web;
 using System.Web.Mvc;
 using Trendyol_Integration.Dal;
 using Trendyol_Integration.Models;
+using Trendyol_Integration.Models.JSONModels;
+using Trendyol_Integration.Util;
 using Trendyol_Integration.ViewModels;
 
 namespace Trendyol_Integration.Controllers
@@ -16,121 +20,193 @@ namespace Trendyol_Integration.Controllers
     public class ProductsController : Controller
     {
         IntegrationContext db = new IntegrationContext();
-        static long LastAPICall = 0;
+        ApiHelper apiHelper = new ApiHelper();
         // GET: Products
         public ActionResult Index()
         {
-            long currenTimeStamp = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
-            if (currenTimeStamp >= LastAPICall + 3600)
+            try
             {
                 GetProducts();
+            }
+            catch (Exception)
+            {
+                ViewBag.Error = "<div class='alert alert-danger' role='alert'>Trendyol'a Erişilemiyor</div>";
             }
             List<Product> products = db.Products.ToList();
             return View(products);
         }
+        public ActionResult Details(int id)
+        {
+
+            Product product = db.Products.Find(id);
+            return View(product);
+        }
+
+
         // GET: Products/Create
         public ActionResult Create()
         {
-            
-            return View();
+
+            List<Category> categories = db.Categories.ToList().Where(x => x.ParentCategory == null).ToList();
+            CreateProductModel createProductModel = new CreateProductModel(GetProviders(),categories);
+            return View(createProductModel);
         }
-        public ActionResult CreateProceed()
+        public ActionResult CreateProceed(CreateProductModel model)
         {
-            return View();
+            
+            if (!ModelState.IsValid)
+            {
+                List<Category> categories = db.Categories.ToList().Where(x => x.ParentCategory == null).ToList();
+                CreateProductModel createProductModel = new CreateProductModel(GetProviders(), categories);
+                
+                return View("Create",createProductModel);
+            }
+            CreateProceedProductModel proceedProductModel = new CreateProceedProductModel();
+            proceedProductModel.Attributes = GetAttributes(model.CategoryId);
+            proceedProductModel.CargoCompanyId = model.CargoCompanyId;
+            proceedProductModel.CategoryId = model.CategoryId;            
+            return View(proceedProductModel);
+        }
+        [HttpPost]
+        public ActionResult CreateProceed(CreateProceedProductModel model)
+        {
+            IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
+            if (!ModelState.IsValid)
+            {
+                model.Attributes = GetAttributes(model.CategoryId);
+                return View(model);
+            }
+            Product product = model.Product;
+            product.Category = db.Categories.Find(model.CategoryId);
+            product.images = model.images;
+            product.Attributes = new List<Models.Attribute>();
+            List<CategoryAttribute> categoryAttributes = GetAttributes(product.Category.CategoryId);
+            foreach (var item in model.Attributes)
+            {
+                Models.Attribute attribute = new Models.Attribute();
+                attribute.AttributeCode = item.Id;
+                attribute.AttributeName = item.Name;
+                if (item.AllowCustom&&!string.IsNullOrEmpty(item.SelectedValue))
+                {
+                    
+                    attribute.AttributeValue = item.SelectedValue;
+                    attribute.AttributeValueId = -1;
+                }
+                else if(!item.AllowCustom&& item.SelectedId != 0)
+                {
+                    string value = categoryAttributes.Find(x => x.Id == item.Id).Values.Find(x => x.Id == item.SelectedId).Value;
+                    attribute.AttributeValue = value;
+                    attribute.AttributeValueId = item.SelectedId;
+                    attribute.Category = product.Category;
+                }
+                if(attribute.AttributeValueId!=0) product.Attributes.Add(attribute);
+            }
+            try
+            {
+                Product oldprouct = db.Products.ToList().Find(x => x.StockCode == product.StockCode);
+                if (oldprouct == null)
+                {
+                     IRestResponse res = apiHelper.CreateProduct(product);
+                     if (res.StatusCode == System.Net.HttpStatusCode.OK)
+                     {
+                         product.batchRequestId = JObject.Parse(res.Content)["batchRequestId"].ToString();
+                          db.Products.Add(product);
+                          db.SaveChanges();
+                     }
+                     else
+                     {
+                        throw new Exception("API Error");
+                     }
+                }
+                else
+                {
+                    ModelState.AddModelError("Product.StockCode", "Sistemde aynı stok kodlu ürün bulunmaktadır");
+                    model.Attributes = GetAttributes(model.CategoryId);
+                    return View(model);
+                }
+               
+            }
+            catch (Exception)
+            {
+                CreateProceedProductModel proceedProductModel = new CreateProceedProductModel();
+                proceedProductModel.Attributes = GetAttributes(model.CategoryId);
+                ViewBag.Error = "Ürün oluşturulamıyor. Lütfen daha sonra yeniden deneyiniz";
+                return View(proceedProductModel);
+            }
+            return RedirectToAction("Index");
+        }
+        public ActionResult Brands(string name)
+        {
+
+            try
+            {
+                List<Brand> brands = apiHelper.GetBrands(name);
+                int index = brands.Count;
+                if (index == 0) return null;
+                if (index > 5) index = 5;
+                return PartialView(brands.GetRange(0, index));
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        private List<CategoryAttribute> GetAttributes(int categoryId)
+        {
+            try
+            {
+                return apiHelper.GetAttributes(categoryId);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
-      
         private List<Provider> GetProviders()
         {
-            
-            var client = new RestClient("https://api.trendyol.com/sapigw");
-            client.Authenticator = new HttpBasicAuthenticator("Bnib0D0RMditHE4NEiV8", "rAsrd6PpPEDiahvsZEKy");
-            client.AddDefaultHeader("user-agent", "235333-PiaLab");
-            var request = new RestRequest("shipment-providers");
-            var response = client.Get(request);
-            JArray responseJSON = JArray.Parse(response.Content);
-            List<Provider> providers = new List<Provider>();
-            foreach (var res in responseJSON)
+            try
             {
-                Provider current = new Provider(int.Parse(res["id"].ToString()),res["name"].ToString());
-                providers.Add(current);
+                return apiHelper.GetProviders();
             }
-            return providers;
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         private List<SupplierAdress> GetAddresses()
         {
-
-            var client = new RestClient("https://api.trendyol.com/sapigw");
-            client.Authenticator = new HttpBasicAuthenticator("Bnib0D0RMditHE4NEiV8", "rAsrd6PpPEDiahvsZEKy");
-            client.AddDefaultHeader("user-agent", "235333-PiaLab");
-            var request = new RestRequest("suppliers/235333/addresses");
-            var response = client.Get(request);
-            JObject responseJSON = JObject.Parse(response.Content);
-            JArray responseArray = (JArray)responseJSON["supplierAddresses"];
-            List<SupplierAdress> addresses = new List<SupplierAdress>();
-            foreach (var res in responseArray)
+            try
             {
-                SupplierAdress address = new SupplierAdress((int)res["id"], res["city"].ToString(), res["district"].ToString());
-                addresses.Add(address);
+                return apiHelper.GetAddresses();
             }
-            return addresses;
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         private void GetProducts()
-        {   
-            
-            var client = new RestClient("https://api.trendyol.com/sapigw");
-            client.Authenticator = new HttpBasicAuthenticator("Bnib0D0RMditHE4NEiV8", "rAsrd6PpPEDiahvsZEKy");
-            client.AddDefaultHeader("user-agent", "235333-PiaLab");
-            var request = new RestRequest("suppliers/235333/products?size=500");
-            var response = client.Get(request);
-            JObject responseJSON = JObject.Parse(response.Content);
-            JArray responseArray = (JArray)responseJSON["content"];
-            LastAPICall =  ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
-            foreach (var res in responseArray)
+        {
+            List<Product> newProducts = apiHelper.GetProducts();
+            foreach (var product in newProducts)
             {
-                Product old = db.Products.ToList().Find(x => x.StockCode == res["stockCode"].ToString());
-                if (old == null)
+                Product oldProduct = db.Products.ToList().Find(x=> x.StockCode == product.StockCode);
+                if(oldProduct == null)
                 {
-                    Product newProduct = new Product();
-                    newProduct.Barcode = res["barcode"].ToString();
-                    newProduct.Title = res["title"].ToString();
-                    newProduct.ProductMainId = res["productMainId"].ToString();
-                    newProduct.BrandId = (int)res["brandId"];
-                    newProduct.BrandName = res["brand"].ToString();
-                    newProduct.Quantity = (int)res["quantity"];
-                    newProduct.StockCode = res["stockCode"].ToString();
-                    newProduct.DimensionalWeight = (decimal)res["dimensionalWeight"];
-                    newProduct.Description = res["description"].ToString();
-                    newProduct.ListPrice = (decimal)res["listPrice"];
-                    newProduct.SalePrice = (decimal)res["salePrice"];
-                    newProduct.CargoCompanyId = -1;
-                    JArray pics = (JArray)res["images"];
-                    List<Image> imagelist = new List<Image>();
-                    foreach (var picture in pics)
+                    product.Category = db.Categories.ToList().Find(x=> x.CategoryName == product.Category.CategoryName);
+                    foreach (var image in product.images)
                     {
-                        Image img = new Image();
-                        String url = picture["url"].ToString();
-                        img.ImageUrl = url;
-                        db.Images.Add(img);
-                        imagelist.Add(img);
+                        db.Images.Add(image);
                     }
-                    newProduct.images = imagelist;
-                    newProduct.VatRate = (int)res["vatRate"];
-                    var Category = db.Categories.ToList().Find(x=>x.CategoryName == res["categoryName"].ToString());
-                    newProduct.Category = Category;
-                    JArray attrs = (JArray)res["attributes"];
-                    List<Models.Attribute> attrlist = new List<Models.Attribute>();
-                    foreach (var attr in attrs)
+                    foreach (var attribute in product.Attributes)
                     {
-                        Models.Attribute attribute = new Models.Attribute();
-                        attribute.AttributeCode = (int)attr["attributeId"];
-                        attribute.Category = Category;
-                        attribute.AttributeName = attr["attributeName"].ToString();
-                        attribute.AttributeValue = attr["attributeValue"].ToString();
-                        attrlist.Add(attribute);
+                        attribute.Category = product.Category;
                     }
-                    newProduct.Attributes = attrlist;
-                    db.Products.Add(newProduct);
+                    db.Products.Add(product);
                 }
             }
             db.SaveChanges();
