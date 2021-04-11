@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Trendyol_Integration.Models;
-using Trendyol_Integration.Models.JSONModels;
 using Trendyol_Integration.ViewModels;
 
 namespace Trendyol_Integration.Util
@@ -16,23 +15,24 @@ namespace Trendyol_Integration.Util
     public class ApiHelper
     {
         private RestHelper restHelper;
-        static long LastListCall = 0;
-        static long LastAPICall = 0;
+        //Last Api call time timetamps
+        static long LastCategoryCall = 0;
+        static long LastProductsCall = 0;
+        //Time between API Calls as seconds between
+        static long CategoryCallTime = 86400;
+        static long ProductCallTime = 0;
+        static string id = "235333";
         public ApiHelper()
         {
             restHelper = new RestHelper();
         }
 
+       //Create Product
         public IRestResponse CreateProduct(Product product)
         {
-            string url = "suppliers/" + 235333 + "/v2/products";
-            List<ProductJSONModel> items = new List<ProductJSONModel>();
-            items.Add(new ProductJSONModel(product));
-            return restHelper.PostRequest(url, JsonConvert.SerializeObject(new { items}));
-        }
-        public IRestResponse CreateProduct2(Product product)
-        {
-            string url = "suppliers/" + 235333 + "/v2/products";
+            //Create Json Object
+            string url = "suppliers/" + id + "/v2/products";
+            //Create Json Object
             JArray items = new JArray();
             JObject item = new JObject();
             item.Add("barcode",product.Barcode);
@@ -82,7 +82,7 @@ namespace Trendyol_Integration.Util
         }
         public List<Brand> GetBrands(string name)
         {
-            string url = "suppliers/" + 235333 + "/v2/products";
+            string url = "suppliers/" + id + "/v2/products";
             string response = restHelper.GetRequest("brands/by-name?name=" + name + "&size=3");
             JArray responseJSON = JArray.Parse(response);
             List<Brand> brands = new List<Brand>();
@@ -128,7 +128,7 @@ namespace Trendyol_Integration.Util
         }
         public List<SupplierAdress> GetAddresses()
         {
-            string response = restHelper.GetRequest("suppliers/235333/addresses");
+            string response = restHelper.GetRequest("suppliers/"+id+"/addresses");
             JObject responseJSON = JObject.Parse(response);
             JArray responseArray = (JArray)responseJSON["supplierAddresses"];
             List<SupplierAdress> addresses = new List<SupplierAdress>();
@@ -140,16 +140,16 @@ namespace Trendyol_Integration.Util
             return addresses;
         }
         public List<Product> GetProducts()
-        {
+        {   //Get current timestamp
             long currenTimeStamp = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
             List<Product> products = new List<Product>();
-            if (true)
+            if (currenTimeStamp >= LastProductsCall+ProductCallTime)
             {
                 //Create product from JSON
-                string response = restHelper.GetRequest("suppliers/235333/products?size=500");
+                string response = restHelper.GetRequest("suppliers/"+id+"/products?size=500");
                 JObject responseJSON = JObject.Parse(response);
                 JArray responseArray = (JArray)responseJSON["content"];
-                LastAPICall = currenTimeStamp;
+                LastProductsCall = currenTimeStamp;
                 foreach (var res in responseArray)
                 {
                     Product newProduct = new Product(res["barcode"].ToString(), res["title"].ToString(),
@@ -195,15 +195,15 @@ namespace Trendyol_Integration.Util
                     products.Add(newProduct);
                 }
             }
-            LastAPICall = currenTimeStamp;
+            LastProductsCall = currenTimeStamp;
             return products;
         }
         public string GetCategories()
-        {
+        {   //Get current timestamp
             long currenTimeStamp = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
-            if (currenTimeStamp >= LastListCall+ 86400)
+            if (currenTimeStamp >= LastCategoryCall+ CategoryCallTime)
             {
-               LastListCall = currenTimeStamp;
+                LastCategoryCall = currenTimeStamp;
                 return restHelper.GetRequest("product-categories");
             }
             else return null;
@@ -211,12 +211,12 @@ namespace Trendyol_Integration.Util
         }
         public string GetSales()
         {
-           return restHelper.GetRequest("suppliers/235333/orders?orderByField=PackageLastModifiedDate&orderByDirection=DESC&size=100");
+           return restHelper.GetRequest("suppliers/"+id+"/orders?orderByField=PackageLastModifiedDate&orderByDirection=DESC&size=100");
             
         }
         public void setStatus(Product product)
         {
-            string response = restHelper.GetRequest("suppliers/235333/products/batch-requests/"+product.batchRequestId);
+            string response = restHelper.GetRequest("suppliers/"+id+"/products/batch-requests/"+product.batchRequestId);
             JObject responseJSON = JObject.Parse(response);
             if (responseJSON["status"]!=null && responseJSON["status"].ToString() == "COMPLETED")
             {
@@ -242,10 +242,9 @@ namespace Trendyol_Integration.Util
 
         }
         public IRestResponse UpdateStocksAndPrice(Product product)
-        {
-
-  
-            string url = "suppliers/" + 235333 + "/products/price-and-inventory";
+        {   
+            //Create request body JSON
+            string url = "suppliers/" + id + "/products/price-and-inventory";
             JArray items = new JArray();
             JObject item = new JObject();
             item.Add("barcode", product.Barcode);

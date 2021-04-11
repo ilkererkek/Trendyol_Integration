@@ -11,7 +11,6 @@ using System.Web;
 using System.Web.Mvc;
 using Trendyol_Integration.Dal;
 using Trendyol_Integration.Models;
-using Trendyol_Integration.Models.JSONModels;
 using Trendyol_Integration.Util;
 using Trendyol_Integration.ViewModels;
 
@@ -136,9 +135,10 @@ namespace Trendyol_Integration.Controllers
                 if (oldprouct == null)
                 {   
                      //Create Product
-                     IRestResponse res = apiHelper.CreateProduct2(product);
+                     IRestResponse res = apiHelper.CreateProduct(product);
                      if (res.StatusCode == System.Net.HttpStatusCode.OK)
                      {
+                         //Check if request is properly handled
                          product.batchRequestId = JObject.Parse(res.Content)["batchRequestId"].ToString();
                          apiHelper.setStatus(product);
                         if (product.Status != "FAILED")
@@ -176,10 +176,12 @@ namespace Trendyol_Integration.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        //POST : Products/UpdateStocksAndPrice
         [HttpPost]
         public ActionResult UpdateStocksAndPrice(Product product)
         {
-
+            //Get original product
             Product oldproduct = db.Products.Include("Attributes").Include("images").ToList().Find(x => x.ProductId == product.ProductId);
             if (oldproduct == null) return new HttpNotFoundResult("Product Not Found");
             if (product.SalePrice > product.ListPrice)
@@ -188,10 +190,12 @@ namespace Trendyol_Integration.Controllers
                 return View("Details",oldproduct);
             }
             try
-            {
+            {   
+                //Post the data
                 IRestResponse response = apiHelper.UpdateStocksAndPrice(product);
                 if (response.StatusCode == HttpStatusCode.OK)
-                {
+                {   
+                    //Change data
                     oldproduct.Quantity = product.Quantity;
                     oldproduct.SalePrice = product.SalePrice;
                     oldproduct.ListPrice = product.ListPrice;

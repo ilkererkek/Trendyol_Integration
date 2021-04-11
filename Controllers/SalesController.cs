@@ -37,6 +37,7 @@ namespace Trendyol_Integration.Controllers
                 List<Sale> sales = new List<Sale>();
                 foreach (var sale in responseList)
                 {
+                    //Create Sale Object from JSON
                     Sale newsale = new Sale(sale["shipmentAddress"]["fullAddress"].ToString(), sale["invoiceAddress"]["fullAddress"].ToString(),
                          (decimal)sale["totalDiscount"], (decimal)sale["totalPrice"], sale["customerFirstName"].ToString(), sale["customerLastName"].ToString(), sale["customerEmail"].ToString(),
                          sale["cargoTrackingNumber"].ToString(), sale["cargoTrackingLink"].ToString(), sale["cargoSenderNumber"].ToString(), sale["cargoProviderName"].ToString(),
@@ -66,6 +67,7 @@ namespace Trendyol_Integration.Controllers
             }
            
         }
+        //Unix time to DateTime Object
         private DateTime ConvertFromUnixTimestamp(int timestamp)
         {
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
