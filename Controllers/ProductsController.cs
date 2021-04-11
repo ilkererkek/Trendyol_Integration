@@ -16,7 +16,7 @@ using Trendyol_Integration.ViewModels;
 
 namespace Trendyol_Integration.Controllers
 {
-   
+    [HandleError]
     public class ProductsController : Controller
     {
         IntegrationContext db = new IntegrationContext();
@@ -26,19 +26,21 @@ namespace Trendyol_Integration.Controllers
         {
             try
             {
+               //Fetch Products Data
                 GetProducts();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 ViewBag.Error = "<div class='alert alert-danger' role='alert'>Trendyol'a Erişilemiyor</div>";
             }
             List<Product> products = db.Products.ToList();
             return View(products);
         }
+        // GET: Products/Details/id
         public ActionResult Details(int id)
         {
 
-            Product product = db.Products.Find(id);
+            Product product = db.Products.Include("images").Include("Attributes").ToList().Find(x => x.ProductId == id);
             return View(product);
         }
 
@@ -46,11 +48,12 @@ namespace Trendyol_Integration.Controllers
         // GET: Products/Create
         public ActionResult Create()
         {
-
+            //Get categories and providers
             List<Category> categories = db.Categories.ToList().Where(x => x.ParentCategory == null).ToList();
             CreateProductModel createProductModel = new CreateProductModel(GetProviders(),categories);
             return View(createProductModel);
         }
+        // GET: Products/CreateProceed
         public ActionResult CreateProceed(CreateProductModel model)
         {
             
@@ -61,16 +64,17 @@ namespace Trendyol_Integration.Controllers
                 
                 return View("Create",createProductModel);
             }
+            //Fetch Attributes with model category id
             CreateProceedProductModel proceedProductModel = new CreateProceedProductModel();
             proceedProductModel.Attributes = GetAttributes(model.CategoryId);
             proceedProductModel.CargoCompanyId = model.CargoCompanyId;
             proceedProductModel.CategoryId = model.CategoryId;            
             return View(proceedProductModel);
         }
+        // POST: Products/CreateProceed
         [HttpPost]
         public ActionResult CreateProceed(CreateProceedProductModel model)
         {
-            IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
             if (!ModelState.IsValid)
             {
                 model.Attributes = GetAttributes(model.CategoryId);
@@ -79,6 +83,12 @@ namespace Trendyol_Integration.Controllers
             Product product = model.Product;
             product.Category = db.Categories.Find(model.CategoryId);
             product.images = model.images;
+            //Create images
+            foreach (var picture in product.images)
+            {
+                picture.Product = product;
+            }
+            //Create Attributes
             product.Attributes = new List<Models.Attribute>();
             List<CategoryAttribute> categoryAttributes = GetAttributes(product.Category.CategoryId);
             foreach (var item in model.Attributes)
@@ -103,9 +113,11 @@ namespace Trendyol_Integration.Controllers
             }
             try
             {
+                //Find if existing stock code exist
                 Product oldprouct = db.Products.ToList().Find(x => x.StockCode == product.StockCode);
                 if (oldprouct == null)
-                {
+                {   
+                     //Create Product
                      IRestResponse res = apiHelper.CreateProduct(product);
                      if (res.StatusCode == System.Net.HttpStatusCode.OK)
                      {
@@ -135,9 +147,10 @@ namespace Trendyol_Integration.Controllers
             }
             return RedirectToAction("Index");
         }
+        // GET: Products/Brands/?name
         public ActionResult Brands(string name)
         {
-
+            //Fetch Brands by name
             try
             {
                 List<Brand> brands = apiHelper.GetBrands(name);
@@ -154,6 +167,7 @@ namespace Trendyol_Integration.Controllers
         }
         private List<CategoryAttribute> GetAttributes(int categoryId)
         {
+            //Get attributes by categoryID
             try
             {
                 return apiHelper.GetAttributes(categoryId);
@@ -189,6 +203,7 @@ namespace Trendyol_Integration.Controllers
                 throw;
             }
         }
+        //Create Products from API
         private void GetProducts()
         {
             List<Product> newProducts = apiHelper.GetProducts();

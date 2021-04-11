@@ -1,13 +1,14 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Error</title>
-</head>
-<body>
-    <hgroup>
-        <h1>Error.</h1>
-        <h2>An error occurred while processing your request.</h2>
-    </hgroup>
-</body>
-</html>
+﻿
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!-- 404 Error Text -->
+<div class="text-center">
+    <div class="error mx-auto" data-text="500">500</div>
+    <p class="lead text-gray-800 mb-5">Sunucu Hatası</p>
+    <p class="text-gray-500 mb-0">Sistemde Bir Hata Meydana Geldi</p>
+    <a href="/">&larr; Anasayfaya Dön</a>
+</div>

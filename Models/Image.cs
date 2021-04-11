@@ -11,5 +11,6 @@ namespace Trendyol_Integration.Models
         public int ImageId { get; set; }
         [Display(Name = "Fotoğraf URL'si")]
         public string ImageUrl { get; set; }
+        public virtual Product Product { get; set; }
     }
 }   

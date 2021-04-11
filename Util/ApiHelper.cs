@@ -11,6 +11,8 @@ using Trendyol_Integration.ViewModels;
 
 namespace Trendyol_Integration.Util
 {
+
+    //Object that manages operations with trendyol api
     public class ApiHelper
     {
         private RestHelper restHelper;
@@ -91,8 +93,9 @@ namespace Trendyol_Integration.Util
         {
             long currenTimeStamp = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
             List<Product> products = new List<Product>();
-            if (currenTimeStamp >= LastAPICall + 3600)
+            if (currenTimeStamp >= LastAPICall+3600)
             {
+                //Create product from JSON
                 string response = restHelper.GetRequest("suppliers/235333/products?size=500");
                 JObject responseJSON = JObject.Parse(response);
                 JArray responseArray = (JArray)responseJSON["content"];
@@ -132,12 +135,17 @@ namespace Trendyol_Integration.Util
         public string GetCategories()
         {
             long currenTimeStamp = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
-            if (currenTimeStamp >= LastListCall + 86400)
+            if (currenTimeStamp >= LastListCall+ 86400)
             {
                LastListCall = currenTimeStamp;
                 return restHelper.GetRequest("product-categories");
             }
             else return null;
+            
+        }
+        public string GetSales()
+        {
+           return restHelper.GetRequest("suppliers/235333/orders?orderByField=PackageLastModifiedDate&orderByDirection=DESC&size=100");
             
         }
     }

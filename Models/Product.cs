@@ -9,15 +9,6 @@ namespace Trendyol_Integration.Models
 {
 
 
-    public class isPriceValid : ValidationAttribute
-    {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-        {
-            var model = (Product)validationContext.ObjectInstance;
-            if (model.ListPrice > model.SalePrice) return ValidationResult.Success;
-            return new ValidationResult("Satış fiyatı liste fiyatından büyük olamaz.");
-        }
-    }
     public class Product
     {
         
@@ -45,7 +36,6 @@ namespace Trendyol_Integration.Models
         public int Quantity { get; set; }
         [Required]
         [StringLength(100)]
-        [Index(IsUnique = true)]
         [Display(Name = "Stok Kodu")]
         public string StockCode { get; set; }
         [Required]
@@ -60,7 +50,6 @@ namespace Trendyol_Integration.Models
         public decimal ListPrice { get; set; }
         [Required]
         [Display(Name = "Satış Fiyatı")]
-        [isPriceValid]
         public decimal SalePrice { get; set; }
         [Display(Name = "Kargo Şirketi")]
         public int CargoCompanyId { get; set; }
@@ -95,6 +84,7 @@ namespace Trendyol_Integration.Models
 
         public Product()
         {
+
         }
     }
 }

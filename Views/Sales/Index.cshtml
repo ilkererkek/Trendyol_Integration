@@ -1,0 +1,60 @@
+﻿
+@model IEnumerable<Trendyol_Integration.Models.Sale>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Satışlar</h1>
+<div>
+    @ViewBag.Error
+</div>
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Satış Tablosu</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Müşteri İsmi</th>
+                        <th>Müşteri Email</th>
+                        <th>Sipariş Tarihi</th>
+                        <th>Sipariş Statüsü</th>
+                        <th>Toplam Fiyat</th>
+                        <th>Kargo Şirketi</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>Müşteri İsmi</th>
+                        <th>Müşteri Email</th>
+                        <th>Sipariş Tarihi</th>
+                        <th>Sipariş Statüsü</th>
+                        <th>Toplam Fiyat</th>
+                        <th>Kargo Şirketi</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    @foreach (var sale in Model)
+                    {
+                        <tr>
+                            <td>@sale.CustomerFirstName @sale.CustomerFirstName</td>
+                            <td>@sale.CustomerEmail</td>
+                            <td>@sale.OrderDate</td>
+                            <td>@sale.ShipmentPackageStatus</td>
+                            <td>@sale.TotalPrice</td>
+                            <td>@sale.CargoProviderName</td>
+                        </tr>
+                    }
+</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+

@@ -7,6 +7,8 @@ namespace Trendyol_Integration.ViewModels
 {
     public class RequireWhenRequired : ValidationAttribute
     {
+
+        //Custom validation to check if required attribute is selected or not.
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             var model = (CategoryAttribute)validationContext.ObjectInstance;

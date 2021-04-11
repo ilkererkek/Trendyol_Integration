@@ -5,6 +5,8 @@ using System.Web;
 
 namespace Trendyol_Integration.Models.JSONModels
 {
+
+    //NOTE: JSON Models are created to be a schema for creating Product JSON files.
     public class ProductJSONModel
     {
         public string barcode { get; set; }

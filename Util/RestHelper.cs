@@ -8,18 +8,21 @@ using Trendyol_Integration.ViewModels;
 
 namespace Trendyol_Integration.Util
 {
+    //Object that makes HTTP calls to api
     public class RestHelper
     {
-        private const string username = "Bnib0D0RMditHE4NEiV8";
-        private const string password = "rAsrd6PpPEDiahvsZEKy";
+        private const string USERNAME = "Bnib0D0RMditHE4NEiV8";
+        private const string PASSWORD = "rAsrd6PpPEDiahvsZEKy";
+        private const string USERAGENT = "235333-PiaLab";
+
         private const string url = "https://api.trendyol.com/sapigw";
        
         RestClient client;
         public RestHelper()
         {
             client = new RestClient(url);
-            client.Authenticator = new HttpBasicAuthenticator(username, password);
-            client.AddDefaultHeader("user-agent", "235333-PiaLab");
+            client.Authenticator = new HttpBasicAuthenticator(USERNAME, PASSWORD);
+            client.AddDefaultHeader("user-agent",USERAGENT );
         }
         public string GetRequest(string url)
         {

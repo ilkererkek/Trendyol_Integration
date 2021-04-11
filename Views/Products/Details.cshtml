@@ -5,127 +5,137 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Details</h2>
+<h1 class="h1 mb-2 ml-3 m5 text-gray-800">Ürün Detayları</h1>
 
 <div>
-    <h4>Product</h4>
     <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Barcode)
-        </dt>
+    <div class="row p-5">
+        @if (Model.images != null && Model.images.ElementAt(0) != null)
+        {
+            <div class="col-lg-4 "><img class="img-fluid" src="@Model.images.ElementAt(0).ImageUrl" alt="Ürün resmi bulunamadı." /></div>
+        }
+        else
+        {
+            <h1 class="h3 mb-2 m5 text-gray-800">Fotoğraf Bulunamadı</h1>
+        }
+        <div class="col-lg-4 card p-0">
+            <div class="card-header text-primary">
+                Ürün Detayları
+            </div>
+            <dl class="dl-horizontal card-body">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Barcode)
+                <dd>
+                    @Html.DisplayFor(model => model.Barcode)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.Barcode)
-        </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Title)
+                </dt>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Title)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.Title)
-        </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.ProductMainId)
+                </dt>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.ProductMainId)
-        </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.ProductMainId)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.BrandName)
+                </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.ProductMainId)
-        </dd>
+                <dd>
+                    @Html.DisplayFor(model => model.BrandName)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.StockCode)
+                </dt>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.BrandId)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.BrandId)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.BrandName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.BrandName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Quantity)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Quantity)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.StockCode)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.StockCode)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.DimensionalWeight)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.DimensionalWeight)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-
-        <dd>
-            @Html.Raw(Model.Description)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.ListPrice)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.ListPrice)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.SalePrice)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.SalePrice)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.CargoCompanyId)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.CargoCompanyId)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.VatRate)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.VatRate)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.batchRequestId)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.batchRequestId)
-        </dd>
-
-    </dl>
+                <dd>
+                    @Html.DisplayFor(model => model.StockCode)
+                </dd>
+            </dl>
+        </div>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.ProductId }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+<div class="col-lg-8">
+        <div class="card m-2">
+            <div class="card-header text-primary font-weight-bolder">
+                Ürün Detayları
+            </div>
+            <dl class="card-body">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Quantity)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Quantity)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.DimensionalWeight)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.DimensionalWeight)
+                </dd>
+
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.ListPrice)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ListPrice)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.SalePrice)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.SalePrice)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.VatRate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.VatRate)
+                </dd>
+            </dl>
+        </div>
+        <div class="card m-2">
+            <div class="card-header text-primary font-weight-bolder">
+                Ürün Özellikleri
+            </div>
+            <dl class="card-body">
+                @for(int i=0; i< Model.Attributes.Count;i++)
+                {
+                    <dt>
+                        @Html.DisplayFor(model => model.Attributes.ElementAt(i).AttributeName)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Attributes.ElementAt(i).AttributeValue)
+                    </dd>
+                }
+            </dl>
+        </div>
+        <div class="card m-2">
+            <div class="card-header text-primary font-weight-bolder">
+                Ürün Açıklaması
+            </div>
+            <div class="card-body">
+                @Html.Raw(Model.Description)
+            </div>
+        </div>
+        <div class="mb-5">
+            <a class="nav-link" href="/Products/Index">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to list</span>
+            </a>
+     </div>
+ </div>
+

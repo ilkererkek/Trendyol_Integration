@@ -1,9 +1,9 @@
 ﻿@model List<Trendyol_Integration.ViewModels.Brand>
 
+<!--Brand names and ids list-->
 <div class="dropdown-menu list-group list-group-flush p-0" aria-labelledby="brandname-input">
     @foreach (var brand in Model)
     {
         <button id="@brand.Id" type='button' class="dropdown-item brand-button">@brand.Name</button>
     }
 </div>
-   

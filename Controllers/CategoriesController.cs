@@ -13,26 +13,39 @@ using Trendyol_Integration.Util;
 
 namespace Trendyol_Integration.Controllers
 {
+    [HandleError]
     public class CategoriesController : Controller
     {
 
         IntegrationContext db = new IntegrationContext();
         ApiHelper apiHelper = new ApiHelper();
+        // GET: Categories/GetCategories
         public ActionResult GetCategories()
         {
+            //Fetch data
             string response =   apiHelper.GetCategories();
             if (!string.IsNullOrEmpty(response))
             {
                 JObject responseJSON = JObject.Parse(response);
                 JArray categoryList = (JArray)responseJSON["categories"];
+                //Traverse tree from roots
                 foreach (var res in categoryList)
                 {
                     TraverseTree((JObject)res, null);
                 }
-                db.SaveChanges();
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
             }
-            return RedirectToAction("Create","Products");
+            return RedirectToAction ("Create","Products");
         }
+        // GET: Categories/GetSubCategoriers/id?index
         public ActionResult GetSubCategories(int id,int? index)
         {
             ViewBag.index = index;
@@ -41,6 +54,7 @@ namespace Trendyol_Integration.Controllers
             if (categories.Count == 0) return null;
             return PartialView(categories);
         }
+        //Post Order Traversal of Category Tree
         private Category TraverseTree(JObject node, Category parent)
         {
             
