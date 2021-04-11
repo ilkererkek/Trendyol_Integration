@@ -30,7 +30,6 @@
                 {
                     <option value=@item.CategoryId>@item.CategoryName</option>
                 }
-
             </select>
         </div>
     </div>
@@ -43,8 +42,11 @@
             <input type="submit" value="Devam Et" class="btn btn-primary btn-block" />
         </div>
     </div>
-    <div class="col-md-5" >
-        @Html.ActionLink("Listeye Dön", "Index")
+    <div class="mb-5">
+        <a class="nav-link" href="/Products/Index">
+            <i class="fas fa-arrow-left"></i>
+            <span>Tabloya Dön</span>
+        </a>
     </div>
 </div>
 }

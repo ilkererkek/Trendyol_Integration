@@ -30,6 +30,56 @@ namespace Trendyol_Integration.Util
             items.Add(new ProductJSONModel(product));
             return restHelper.PostRequest(url, JsonConvert.SerializeObject(new { items}));
         }
+        public IRestResponse CreateProduct2(Product product)
+        {
+            string url = "suppliers/" + 235333 + "/v2/products";
+            JArray items = new JArray();
+            JObject item = new JObject();
+            item.Add("barcode",product.Barcode);
+            item.Add("title",product.Title);
+            item.Add("productMainId", product.ProductMainId);
+            item.Add("brandId", product.BrandId);
+            item.Add("categoryId", product.Category.CategoryId);
+            item.Add("quantity", product.Quantity);
+            item.Add("stockCode", product.StockCode);
+            item.Add("currencyType", "TRY");
+            item.Add("dimensionalWeight", product.DimensionalWeight);
+            item.Add("description", product.Description);
+            item.Add("listPrice", product.ListPrice);
+            item.Add("salePrice", product.SalePrice);
+            item.Add("cargoCompanyId", product.CargoCompanyId);
+            item.Add("vatRate", product.VatRate);
+            JArray images = new JArray();
+            foreach (var image in product.images)
+            {
+                JObject img = new JObject();
+                img.Add("url", image.ImageUrl);
+                images.Add(img);
+            }
+            JArray attributes = new JArray();
+            foreach (var attribute in product.Attributes)
+            {
+
+                JObject attr = new JObject();
+                attr.Add("attributeId", attribute.AttributeCode);
+                if (attribute.AttributeValueId != -1)
+                {
+                    attr.Add("attributeValueId", attribute.AttributeValueId);
+
+                }
+                else
+                {
+                    attr.Add("customAttributeValue", attribute.AttributeValue);
+                }
+                attributes.Add(attr);
+            }
+            item.Add("images",images);
+            item.Add("attributes",attributes);
+            items.Add(item);
+            JObject json = new JObject();
+            json.Add("items", items);
+            return restHelper.PostRequest(url,json.ToString());
+        }
         public List<Brand> GetBrands(string name)
         {
             string url = "suppliers/" + 235333 + "/v2/products";
@@ -189,6 +239,23 @@ namespace Trendyol_Integration.Util
                 //If batch status is not found
                 product.Status = "Bulunamadı";
             }
+
+        }
+        public IRestResponse UpdateStocksAndPrice(Product product)
+        {
+
+  
+            string url = "suppliers/" + 235333 + "/products/price-and-inventory";
+            JArray items = new JArray();
+            JObject item = new JObject();
+            item.Add("barcode", product.Barcode);
+            item.Add("quantity", product.Quantity);
+            item.Add("salePrice", product.SalePrice);
+            item.Add("listPrice", product.ListPrice);
+            items.Add(item);
+            JObject json = new JObject();
+            json.Add("items", items);
+            return restHelper.PostRequest(url,json.ToString() );
 
         }
     }

@@ -153,12 +153,15 @@
         @Html.HiddenFor(model => model.Product.CargoCompanyId, new { Value = Model.CargoCompanyId })
         @Html.HiddenFor(model => model.CargoCompanyId, new { Value = Model.CargoCompanyId })
         <div class="form-group mt-5">
-            <div class="col-md-8 pl-0">
+            <div class="col-md-5 pl-0">
                 <input type="submit" value="Oluştur" class="btn btn-primary btn-block" />
             </div>
         </div>
-        <div class="col-md-5 pl-0">
-            @Html.ActionLink("Geri Dön", "Create")
+        <div class="mb-5">
+            <a class="nav-link" href="/Products/Create">
+                <i class="fas fa-arrow-left"></i>
+                <span>Geri Dön</span>
+            </a>
         </div>
     </div>
 }

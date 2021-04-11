@@ -6,6 +6,7 @@ using RestSharp.Serialization.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Trendyol_Integration.Dal;
@@ -87,7 +88,7 @@ namespace Trendyol_Integration.Controllers
                 model.Attributes = GetAttributes(model.CategoryId);
                 return View(model);
             }
-            if(model.Product.VatRate!=0|| model.Product.VatRate != 1|| model.Product.VatRate != 8||model.Product.VatRate != 18)
+            if(model.Product.VatRate!=0&& model.Product.VatRate != 1 && model.Product.VatRate != 8 && model.Product.VatRate != 18)
             {
                 ModelState.AddModelError("Product.VatRate", "Ürün KDV oranı 0,1,8,18 gibi olmalı");
                 model.Attributes = GetAttributes(model.CategoryId);
@@ -95,11 +96,15 @@ namespace Trendyol_Integration.Controllers
             }
             Product product = model.Product;
             product.Category = db.Categories.Find(model.CategoryId);
-            product.images = model.images;
+            product.images = new List<Image>();
             //Create images
             foreach (var picture in product.images)
             {
-                picture.Product = product;
+                if (string.IsNullOrEmpty(picture.ImageUrl))
+                {
+                    picture.Product = product;
+                    product.images.Add(picture);
+                }   
             }
             //Create Attributes
             product.Attributes = new List<Models.Attribute>();
@@ -131,7 +136,7 @@ namespace Trendyol_Integration.Controllers
                 if (oldprouct == null)
                 {   
                      //Create Product
-                     IRestResponse res = apiHelper.CreateProduct(product);
+                     IRestResponse res = apiHelper.CreateProduct2(product);
                      if (res.StatusCode == System.Net.HttpStatusCode.OK)
                      {
                          product.batchRequestId = JObject.Parse(res.Content)["batchRequestId"].ToString();
@@ -170,6 +175,39 @@ namespace Trendyol_Integration.Controllers
                 return View(proceedProductModel);
             }
             return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public ActionResult UpdateStocksAndPrice(Product product)
+        {
+
+            Product oldproduct = db.Products.Include("Attributes").Include("images").ToList().Find(x => x.ProductId == product.ProductId);
+            if (oldproduct == null) return new HttpNotFoundResult("Product Not Found");
+            if (product.SalePrice > product.ListPrice)
+            {
+                ModelState.AddModelError("Product.SalePrice", "Satış fiyatı liste fiyatından büyük olamaz");
+                return View("Details",oldproduct);
+            }
+            try
+            {
+                IRestResponse response = apiHelper.UpdateStocksAndPrice(product);
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    oldproduct.Quantity = product.Quantity;
+                    oldproduct.SalePrice = product.SalePrice;
+                    oldproduct.ListPrice = product.ListPrice;
+                    oldproduct.batchRequestId = JObject.Parse(response.Content)["batchRequestId"].ToString();
+                    db.SaveChanges();
+                    return View("Details",oldproduct );
+                }
+                else throw new Exception("Server Error");
+
+            }
+            catch (Exception e)
+            {
+            }
+                ViewBag.Error = "Ürün Güncellenemiyor. Daha sonra tekrar deneyiniz";
+
+            return View("Details",oldproduct);
         }
         // GET: Products/Brands/?name
         public ActionResult Brands(string name)
