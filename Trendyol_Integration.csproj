@@ -143,9 +143,6 @@
     <Compile Include="Models\Attribute.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Image.cs" />
-    <Compile Include="Models\JSONModels\AttributeJSONModel.cs" />
-    <Compile Include="Models\JSONModels\ImageJSONModel.cs" />
-    <Compile Include="Models\JSONModels\ProductJSONModel.cs" />
     <Compile Include="Models\Line.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\Product.cs" />
