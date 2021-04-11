@@ -43,7 +43,7 @@ namespace Trendyol_Integration.Controllers
                     throw;
                 }
             }
-            return RedirectToAction ("Create","Products");
+            return RedirectToAction ("Index","Products");
         }
         // GET: Categories/GetSubCategoriers/id?index
         public ActionResult GetSubCategories(int id,int? index)

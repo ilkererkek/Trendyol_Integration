@@ -93,7 +93,7 @@ namespace Trendyol_Integration.Util
         {
             long currenTimeStamp = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
             List<Product> products = new List<Product>();
-            if (currenTimeStamp >= LastAPICall+3600)
+            if (true)
             {
                 //Create product from JSON
                 string response = restHelper.GetRequest("suppliers/235333/products?size=500");
@@ -126,6 +126,22 @@ namespace Trendyol_Integration.Util
                         attribute.AttributeValue = attr["attributeValue"].ToString();
                         newProduct.Attributes.Add(attribute);
                     }
+                    if ((bool)res["rejected"])
+                    {
+                        newProduct.Status = "Reddedildi";
+                        JArray status = (JArray)res["rejectReasonDetails"];
+                        newProduct.StatusDescription = status.ToString();
+                    }
+                    else if ((bool)res["blacklisted"])
+                    {
+                        newProduct.Status = "Karaliste";
+                        newProduct.StatusDescription = res["blacklistReason"].ToString();
+                    }
+                    else if((bool)res["approved"])
+                    {
+                        newProduct.Status = "Onaylandı";
+                        newProduct.StatusDescription = "";
+                    }
                     products.Add(newProduct);
                 }
             }
@@ -147,6 +163,33 @@ namespace Trendyol_Integration.Util
         {
            return restHelper.GetRequest("suppliers/235333/orders?orderByField=PackageLastModifiedDate&orderByDirection=DESC&size=100");
             
+        }
+        public void setStatus(Product product)
+        {
+            string response = restHelper.GetRequest("suppliers/235333/products/batch-requests/"+product.batchRequestId);
+            JObject responseJSON = JObject.Parse(response);
+            if (responseJSON["status"]!=null && responseJSON["status"].ToString() == "COMPLETED")
+            {
+                JArray responseArray = (JArray)responseJSON["items"];
+                foreach (var item in responseArray)
+                {
+                    if(item["requestItem"]["barcode"].ToString() == product.Barcode)
+                    {
+                        product.Status = item["status"].ToString();
+                        if (product.Status == "SUCCESS")
+                        {
+                            product.Status = "Başarılı";
+                            product.StatusDescription = "";
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //If batch status is not found
+                product.Status = "Bulunamadı";
+            }
+
         }
     }
 }

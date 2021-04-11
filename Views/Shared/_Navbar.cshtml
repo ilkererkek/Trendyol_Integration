@@ -14,7 +14,7 @@
 
     <!-- Nav Item - Dashboard -->
     <li class="nav-item active">
-        <a class="nav-link" href="/Sales">
+        <a class="nav-link" href="/Sales/Index">
             <i class="fas fa-truck"></i>
             <span>Satışlar</span>
         </a>
@@ -38,8 +38,8 @@
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Ürün İşlemleri</h6>
-                @Html.ActionLink("Ürün Tablosu", "Index","Products",null, new { @class = "collapse-item" })
-                @Html.ActionLink("Ürün Yarat", "GetCategories", "Categories",null, new { @class = "collapse-item" })
+                @Html.ActionLink("Ürün Tablosu", "GetCategories","Categories",null, new { @class = "collapse-item" })
+                @Html.ActionLink("Ürün Oluştur", "Create", "Products",null, new { @class = "collapse-item" })
             </div>
         </div>
     </li>

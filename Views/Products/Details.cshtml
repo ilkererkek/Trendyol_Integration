@@ -54,9 +54,14 @@
                 <dt>
                     @Html.DisplayNameFor(model => model.StockCode)
                 </dt>
-
                 <dd>
                     @Html.DisplayFor(model => model.StockCode)
+                </dd>
+                <dt class=@(Model.Status=="Onaylandı"||Model.Status=="Başarılı"?"text-success":"text-danger")>
+                    Onay Durumu : @Model.Status
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.StatusDescription)
                 </dd>
             </dl>
         </div>

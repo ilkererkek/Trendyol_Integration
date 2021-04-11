@@ -75,8 +75,21 @@ namespace Trendyol_Integration.Controllers
         [HttpPost]
         public ActionResult CreateProceed(CreateProceedProductModel model)
         {
+            
             if (!ModelState.IsValid)
             {
+                model.Attributes = GetAttributes(model.CategoryId);
+                return View(model);
+            }
+            if(model.Product.SalePrice> model.Product.ListPrice)
+            {
+                ModelState.AddModelError("Product.SalePrice", "Satış fiyatı liste fiyatından büyük olamaz");
+                model.Attributes = GetAttributes(model.CategoryId);
+                return View(model);
+            }
+            if(model.Product.VatRate!=0|| model.Product.VatRate != 1|| model.Product.VatRate != 8||model.Product.VatRate != 18)
+            {
+                ModelState.AddModelError("Product.VatRate", "Ürün KDV oranı 0,1,8,18 gibi olmalı");
                 model.Attributes = GetAttributes(model.CategoryId);
                 return View(model);
             }
@@ -113,8 +126,8 @@ namespace Trendyol_Integration.Controllers
             }
             try
             {
-                //Find if existing stock code exist
-                Product oldprouct = db.Products.ToList().Find(x => x.StockCode == product.StockCode);
+                //Find if existing barcode code exist
+                Product oldprouct = db.Products.ToList().Find(x => x.Barcode == product.Barcode);
                 if (oldprouct == null)
                 {   
                      //Create Product
@@ -122,8 +135,19 @@ namespace Trendyol_Integration.Controllers
                      if (res.StatusCode == System.Net.HttpStatusCode.OK)
                      {
                          product.batchRequestId = JObject.Parse(res.Content)["batchRequestId"].ToString();
-                          db.Products.Add(product);
-                          db.SaveChanges();
+                         apiHelper.setStatus(product);
+                        if (product.Status != "FAILED")
+                        {
+                            db.Products.Add(product);
+                            db.SaveChanges();
+                        }
+                        else
+                        {
+                            ViewBag.Error = "Ürün oluşturulamıyor";
+                            model.Attributes = GetAttributes(model.CategoryId);
+                            return View(model);
+                        }
+                        
                      }
                      else
                      {
@@ -132,15 +156,15 @@ namespace Trendyol_Integration.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("Product.StockCode", "Sistemde aynı stok kodlu ürün bulunmaktadır");
+                    ModelState.AddModelError("Product.Barcode", "Sistemde aynı barkodlu ürün bulunmaktadır");
                     model.Attributes = GetAttributes(model.CategoryId);
                     return View(model);
                 }
                
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                CreateProceedProductModel proceedProductModel = new CreateProceedProductModel();
+                CreateProceedProductModel proceedProductModel = model;
                 proceedProductModel.Attributes = GetAttributes(model.CategoryId);
                 ViewBag.Error = "Ürün oluşturulamıyor. Lütfen daha sonra yeniden deneyiniz";
                 return View(proceedProductModel);
@@ -209,7 +233,7 @@ namespace Trendyol_Integration.Controllers
             List<Product> newProducts = apiHelper.GetProducts();
             foreach (var product in newProducts)
             {
-                Product oldProduct = db.Products.ToList().Find(x=> x.StockCode == product.StockCode);
+                Product oldProduct = db.Products.ToList().Find(x=> x.Barcode == product.Barcode);
                 if(oldProduct == null)
                 {
                     product.Category = db.Categories.ToList().Find(x=> x.CategoryName == product.Category.CategoryName);
@@ -222,6 +246,22 @@ namespace Trendyol_Integration.Controllers
                         attribute.Category = product.Category;
                     }
                     db.Products.Add(product);
+                }
+                else
+                {
+                    //If statust is not found check batch status
+                    if (string.IsNullOrEmpty(product.Status))
+                    {
+                      
+                        apiHelper.setStatus(oldProduct);
+                        oldProduct.Quantity = product.Quantity;
+                    }
+                    else
+                    {
+                        oldProduct.Status = product.Status;
+                        oldProduct.StatusDescription = product.StatusDescription;
+                        oldProduct.Quantity = product.Quantity;
+                    }
                 }
             }
             db.SaveChanges();

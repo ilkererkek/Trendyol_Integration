@@ -59,6 +59,9 @@ namespace Trendyol_Integration.Models
         public int VatRate { get; set; }
 
         public string batchRequestId { get; set; }
+
+        public string Status { get; set; }
+        public string StatusDescription { get; set; }
         public ICollection<Attribute> Attributes { get; set; }
         public virtual Category Category { get; set; }
 

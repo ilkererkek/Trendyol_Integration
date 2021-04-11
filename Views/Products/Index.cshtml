@@ -26,6 +26,7 @@
                         <th>Stok Miktarı</th>
                         <th>Liste Fiyatı</th>
                         <th>Satış Fiyatı</th>
+                        <th>Ürün Durumu</th>
                         <th>Detaylar</th>
                     </tr>
                 </thead>
@@ -38,21 +39,23 @@
                         <th>Stok Miktarı</th>
                         <th>Liste Fiyatı</th>
                         <th>Satış Fiyatı</th>
+                        <th>Ürün Durumu</th>
                         <th>Detaylar</th>
                     </tr>
                 </tfoot>
                 <tbody>
-                    @foreach (var prodcut in Model)
+                    @foreach (var product in Model)
                     {
                         <tr>
-                            <td>@prodcut.Title</td>
-                            <td>@prodcut.Barcode</td>
-                            <td>@prodcut.ProductMainId</td>
-                            <td>@prodcut.BrandName</td>
-                            <td>@prodcut.Quantity</td>
-                            <td>@prodcut.ListPrice₺</td>
-                            <td>@prodcut.SalePrice₺</td>
-                            <td>@Html.ActionLink("Detaylar", "Details", new { id = prodcut.ProductId }, new { @class = "btn btn-primary btn-block" })</td>
+                            <td>@product.Title</td>
+                            <td>@product.Barcode</td>
+                            <td>@product.ProductMainId</td>
+                            <td>@product.BrandName</td>
+                            <td>@product.Quantity</td>
+                            <td>@product.ListPrice₺</td>
+                            <td>@product.SalePrice₺</td>
+                            <td class=@(product.Status=="Onaylandı"||product.Status=="Başarılı"?"text-success":"text-danger")>@product.Status</td>
+                            <td>@Html.ActionLink("Detaylar", "Details", new { id = product.ProductId }, new { @class = "btn btn-primary btn-block" })</td>
                         </tr>
                     }
                 </tbody>
