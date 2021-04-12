@@ -10,7 +10,7 @@
 <div>
     <hr />
     <div class="row p-5">
-        @if (Model.images != null && Model.images.ElementAt(0) != null)
+        @if (Model.images.Count>0 && Model.images.ElementAt(0) != null)
         {
             <div class="col-lg-4 "><img class="img-fluid" src="@Model.images.ElementAt(0).ImageUrl" alt="Ürün resmi bulunamadı." /></div>
         }

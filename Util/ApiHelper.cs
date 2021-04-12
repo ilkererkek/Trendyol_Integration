@@ -30,7 +30,7 @@ namespace Trendyol_Integration.Util
        //Create Product
         public IRestResponse CreateProduct(Product product)
         {
-            //Create Json Object
+           
             string url = "suppliers/" + id + "/v2/products";
             //Create Json Object
             JArray items = new JArray();
@@ -82,7 +82,6 @@ namespace Trendyol_Integration.Util
         }
         public List<Brand> GetBrands(string name)
         {
-            string url = "suppliers/" + id + "/v2/products";
             string response = restHelper.GetRequest("brands/by-name?name=" + name + "&size=3");
             JArray responseJSON = JArray.Parse(response);
             List<Brand> brands = new List<Brand>();
