@@ -11,9 +11,9 @@ namespace Trendyol_Integration.Util
     //Object that makes HTTP calls to api
     public class RestHelper
     {
-        private const string USERNAME = "Bnib0D0RMditHE4NEiV8";
-        private const string PASSWORD = "rAsrd6PpPEDiahvsZEKy";
-        private const string USERAGENT = "235333-PiaLab";
+        private const string USERNAME = "USERNAME-HERE";
+        private const string PASSWORD = "USERNAME-HERE";
+        private const string USERAGENT = "USERAGENT-VALUE-HERE";
 
         private const string url = "https://api.trendyol.com/sapigw";
        
